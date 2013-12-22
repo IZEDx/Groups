@@ -1,0 +1,1 @@
+{"name":"Owner","permission":["*"],"inherits":"Admin"}

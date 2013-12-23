@@ -15,7 +15,7 @@ CreateGroup = function(name, permission, inherits, color)
 	grp.permission = permission
 	grp.inherits = inherits
 	grp.color = color
-	table.insert(Groups, grp)
+	Groups[name] = grp
 end
 ParseColor = function(t)
 	if(t)then
@@ -424,9 +424,11 @@ Events:Subscribe("ZEDScoreboardUpdate", function()
 end)
 	
 Events:Subscribe("ZEDPlayerInit", function(args)
-	PData:Load(args.player, {group="User"})
-	if(not PData:Get(args.player).group)then
-		PData:Set(args.player, {group = "User"})
+	if not GetPlayerGroup(args.player) then
+		PData:Load(args.player, {group="User"})
+		if(not PData:Get(args.player).group)then
+			PData:Set(args.player, {group = "User"})
+		end
 	end
 end)
 

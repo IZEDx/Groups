@@ -1,1 +1,1 @@
-{"name":"User","permission":["t"]}
+{"name":"User","permission":["help","version","who","getpos","jump","warp","info","t","tp"]}

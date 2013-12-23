@@ -420,7 +420,7 @@ Events:Subscribe("ZEDScoreboardUpdate", function()
 			tbl[player:GetId()] = GetPlayerGroup(player).name
 		end
 	end
-	Events:Fire("ZEDUpdateScoreboard", {Group=tbl})
+	Events:Fire("ZEDUpdateScoreboard", {Extra={Group=tbl},Columns={},Buttons={}})
 end)
 	
 Events:Subscribe("ZEDPlayerInit", function(args)
@@ -435,8 +435,10 @@ Events:Subscribe("PlayerQuit", function(args)
 end)
 
 Events:Subscribe("ZEDPlayerHasPermission", function(args)
-	if(GroupHasPermission(GetPlayerGroup(args.player).name, args.permission))then
-		return false
+	if(GetPlayerGroup(args.player) and args.permission)then
+		if(GroupHasPermission(GetPlayerGroup(args.player).name, args.permission))then
+			return false
+		end
 	end
 end)
 

@@ -16,7 +16,7 @@ CreateGroup = function(name, permission, inherits, color)
 	grp.inherits = inherits
 	grp.color = color
 	Groups[name] = grp
-end
+end 
 ParseColor = function(t)
 	if(t)then
 		return Color(t[1],t[2],t[3])

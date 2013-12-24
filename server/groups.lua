@@ -434,6 +434,7 @@ end)
 
 Events:Subscribe("PlayerQuit", function(args)
 	PData:Save(args.player)
+	PData:Delete(args.player)
 end)
 
 Events:Subscribe("ZEDPlayerHasPermission", function(args)

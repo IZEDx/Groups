@@ -1,1 +1,1 @@
-{"name":"User","permission":["help","version","who","getpos","jump","warp","info","t","tp"]}
+{"permission":["help","version","who","getpos","jump","warp","info","t","tp"],"name":"User","color":["150","150","150"],"useprefix":false}

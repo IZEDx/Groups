@@ -9,17 +9,18 @@ function SendChatMessage(ply, ...)
 end
 
 Groups = {}
-CreateGroup = function(name, permission, inherits, color)
+CreateGroup = function(name, permission, inherits, color, useprefix)
 	grp = {}
 	grp.name = name
 	grp.permission = permission
 	grp.inherits = inherits
 	grp.color = color
+	grp.useprefix = useprefix
 	Groups[name] = grp
 end 
 ParseColor = function(t)
-	if(t)then
-		return Color(t[1],t[2],t[3])
+	if(type(t) == "table")then
+		return Color(tonumber(t[1]),tonumber(t[2]),tonumber(t[3]))
 	end
 end
 GetGroup = function(g)
@@ -228,6 +229,25 @@ Events:Subscribe("ZEDExecuteCommand", function(a)
 				else
 					SendChatMessage(ply, Color(200,0,0,255),"Can't find " .. args[3])
 				end
+			elseif(strFind(args[2], "toggleprefix"))then
+				if(FindGroup(args[3]))then
+					for k,v in pairs(Groups) do
+						if(v.name == FindGroup(args[3]).name)then
+							if not Groups[k].useprefix then
+								Groups[k].useprefix = true
+							else
+								Groups[k].useprefix = not Groups[k].useprefix
+							end
+						end
+					end
+					local str = json():encode(FindGroup(args[3]))
+					local file = io.open("./data/groups/"..FindGroup(args[3]).name..".txt", "w")
+					file:write(str)
+					file:close()
+					SendChatMessage(ply, Color(0,200,0,255), "Prefix toggled.")
+				else
+					SendChatMessage(ply, Color(200,0,0,255), "Can't find " .. args[2])
+				end
 			end
 		else
 			SendChatMessage(ply, Color(200,0,0,255),"Syntax: /group create <name> <inherits>")
@@ -235,6 +255,7 @@ Events:Subscribe("ZEDExecuteCommand", function(a)
 			SendChatMessage(ply, Color(200,0,0,255),"Syntax: /group addperm <group> <permission>")
 			SendChatMessage(ply, Color(200,0,0,255),"Syntax: /group delperm <group> <permission>")
 			SendChatMessage(ply, Color(200,0,0,255),"Syntax: /group setcolor <group> <r> <g> <b>")
+			SendChatMessage(ply, Color(200,0,0,255),"Syntax: /group toggleprefix <group>")
 			if(#Groups > 0)then
 				SendChatMessage(ply, Color(0,180,130),"Available Groups:")
 				local c = 0
@@ -386,6 +407,25 @@ Console:Subscribe("group", function(args)
 			else
 				print("Can't find " .. args[2])
 			end
+		elseif(strFind(args[1], "toggleprefix"))then
+			if(FindGroup(args[2]))then
+				for k,v in pairs(Groups) do
+					if(v.name == FindGroup(args[2]).name)then
+						if not Groups[k].useprefix then
+							Groups[k].useprefix = true
+						else
+							Groups[k].useprefix = not Groups[k].useprefix
+						end
+					end
+				end
+				local str = json():encode(FindGroup(args[2]))
+				local file = io.open("./data/groups/"..FindGroup(args[2]).name..".txt", "w")
+				file:write(str)
+				file:close()
+				print("Prefix toggled.")
+			else
+				print("Can't find " .. args[2])
+			end
 		end
 	else
 		print("Syntax: group create <name> <inherits>")
@@ -393,6 +433,7 @@ Console:Subscribe("group", function(args)
 		print("Syntax: group addperm <group> <permission>")
 		print("Syntax: group delperm <group> <permission>")
 		print("Syntax: group setcolor <group> <r> <g> <b>")
+		print("Syntax: group toggleprefix <group>")
 		if(#Groups > 0)then
 			print("Available Groups:")
 			local c = 0
@@ -437,6 +478,19 @@ Events:Subscribe("PlayerQuit", function(args)
 	PData:Delete(args.player)
 end)
 
+Events:Subscribe("ZEDRequestPrefix", function(player)
+	if GetPlayerGroup(player).useprefix then
+		if not GetPlayerGroup(player).color then 
+			for k,v in pairs(Groups) do
+				if(v.name == GetPlayerGroup(player).name)then
+					Groups[k].color = {255, 255, 255}
+				end
+			end
+		end
+		Events:Fire("ZEDSetPrefix", {player=player, prefix={ParseColor(GetPlayerGroup(player).color), "[" .. GetPlayerGroup(player).name .. "] "}})
+	end
+end)
+
 Events:Subscribe("ZEDPlayerHasPermission", function(args)
 	if(GetPlayerGroup(args.player) and args.permission)then
 		if(GroupHasPermission(GetPlayerGroup(args.player).name, args.permission))then
@@ -450,7 +504,7 @@ Events:Subscribe("ModulesLoad", function()
 		local file = io.open("./data/groups/" .. v, "r")
 		local ret = json():decode(file:read("*all"))
 		if(ret)then
-			CreateGroup(string.sub(v, 1, -5), ret.permission, ret.inherits, ret.color)
+			CreateGroup(string.sub(v, 1, -5), ret.permission, ret.inherits, ret.color, ret.useprefix)
 		end
 	end
 end)
